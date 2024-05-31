@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  Admin
+  Staff
+  User
+}
+
+enum Status {
+  Menunggu
+  Ditolak
+  Disetujui
+  Selesai
+}
+
+model tbl_user {
+  id           Int      @id @default(autoincrement())
+  nama_user    String?  @db.VarChar(255)
+  email        String   @db.VarChar(255) @unique
+  password     String   @db.VarChar(255)
+  role         Role
+
+  peminjaman tbl_peminjaman[]
+}
+
+model tbl_barang {
+  id            Int      @id @default(autoincrement())
+  kd_barang     String   @db.VarChar(255)
+  nama_barang   String?  @db.VarChar(255)
+  merk          String?  @db.VarChar(255)
+  stok          Int      @db.Int
+  spesifikasi   String   @db.Text
+  foto_barang   String   @db.VarChar(255)
+
+  peminjaman tbl_peminjaman[]
+}
+
+model tbl_peminjaman {
+  id                 Int       @id @default(autoincrement())
+  id_user            Int       @db.Int
+  id_barang          Int       @db.Int
+  tgl_pinjam         DateTime  @db.Date
+  tgl_selesai        DateTime  @db.Date
+  tgl_pengembalian   DateTime  @db.Date
+  qty                Int       @db.Int
+  status             Status
+
+  user tbl_user @relation(references: [id], fields: [id_user])
+  barang tbl_barang @relation(references: [id], fields: [id_barang])
+}
